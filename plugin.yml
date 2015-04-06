@@ -1,0 +1,8 @@
+name: TelePortals
+version: 1.0
+main: me.tesnos6921.teleportals.Main
+description: A teleporting portal plugin.
+
+commands:
+  rtp:
+    description: Registers a TelePortal based on the sign that the player looks at.
