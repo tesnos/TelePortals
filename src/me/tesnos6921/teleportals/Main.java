@@ -4,6 +4,8 @@ import java.util.Set;
 import java.util.logging.Logger;
 
 import net.md_5.bungee.api.ChatColor;
+import net.milkbowl.vault.economy.Economy;
+import net.milkbowl.vault.economy.EconomyResponse;
 
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -17,6 +19,7 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
+import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.java.JavaPlugin;
  
  
@@ -24,13 +27,31 @@ public final class Main extends JavaPlugin implements Listener {
     
     public final Logger logger = java.util.logging.Logger
 			.getLogger("Minecraft");
+    public static Economy econ = null;
     
     @Override
     public void onEnable(){
     	this.logger.info("[TelePortals] " + "TelePortals Version 1.0 Has Been Enabled!");
         getServer().getPluginManager().registerEvents(this, this);
         saveConfig();
+        if (!setupEconomy()) {
+			getServer().getPluginManager().disablePlugin(this);
+			return;
+		}
     }
+    
+    private boolean setupEconomy() {
+		if (getServer().getPluginManager().getPlugin("Vault") == null) {
+			return false;
+		}
+		RegisteredServiceProvider<Economy> rsp = getServer()
+				.getServicesManager().getRegistration(Economy.class);
+		if (rsp == null) {
+			return false;
+		}
+		econ = rsp.getProvider();
+		return econ != null;
+	}
  
     @Override
     public void onDisable() {
@@ -54,7 +75,8 @@ public final class Main extends JavaPlugin implements Listener {
         }
     }
     
-    @EventHandler
+    @SuppressWarnings("deprecation")
+	@EventHandler
     public void onPlayerMove(PlayerMoveEvent e) {
     	Player p = e.getPlayer();
     	Block block = p.getLocation().getBlock().getRelative(1, 2, 0);
@@ -62,11 +84,25 @@ public final class Main extends JavaPlugin implements Listener {
     		Sign sign = (Sign) block.getState();
     		if(ChatColor.stripColor(sign.getLine(0)).equalsIgnoreCase("[TelePortal]")) {
     			if(getConfig().contains("teleportals." + sign.getLine(1) + ".x")) {
-    				Location tplocation = new Location((World) p.getWorld(), Double.parseDouble(getConfig().getString("teleportals." + sign.getLine(1) + ".x")), Double.parseDouble(getConfig().getString("teleportals." + sign.getLine(1) + ".y")), Double.parseDouble(getConfig().getString("teleportals." + sign.getLine(1) + ".z")));
-		            if (p.getLocation().getBlock().getRelative(0, 0, 0).getType() == Material.STONE_PLATE) {
-		                p.teleport(tplocation);
-		                p.sendMessage(ChatColor.GREEN + "You have been teleported to " + sign.getLine(1) + "!");
-		            }
+    				if(getConfig().contains("teleportals." + sign.getLine(1) + ".cost")) {
+	    				EconomyResponse r = econ.withdrawPlayer(p.getName(), Integer.parseInt(getConfig().getString("teleportals." + sign.getLine(1) + ".cost")));
+	    				if (r.transactionSuccess()) {
+	    					Location tplocation = new Location((World) p.getWorld(), Double.parseDouble(getConfig().getString("teleportals." + sign.getLine(1) + ".x")), Double.parseDouble(getConfig().getString("teleportals." + sign.getLine(1) + ".y")), Double.parseDouble(getConfig().getString("teleportals." + sign.getLine(1) + ".z")));
+	    		            if (p.getLocation().getBlock().getRelative(0, 0, 0).getType() == Material.STONE_PLATE) {
+	    		                p.teleport(tplocation);
+	    		                p.sendMessage(ChatColor.GREEN + "You have been teleported to " + sign.getLine(1) + "!");
+	    		            }
+	    				} else {
+	    					p.sendMessage(ChatColor.RED
+	    							+ "You don't have enough money to use this TelePortal!");
+	    				}
+    				} else {
+    					Location tplocation = new Location((World) p.getWorld(), Double.parseDouble(getConfig().getString("teleportals." + sign.getLine(1) + ".x")), Double.parseDouble(getConfig().getString("teleportals." + sign.getLine(1) + ".y")), Double.parseDouble(getConfig().getString("teleportals." + sign.getLine(1) + ".z")));
+    		            if (p.getLocation().getBlock().getRelative(0, 0, 0).getType() == Material.STONE_PLATE) {
+    		                p.teleport(tplocation);
+    		                p.sendMessage(ChatColor.GREEN + "You have been teleported to " + sign.getLine(1) + "!");
+    		            }
+    				}
     			} else {
     				p.sendMessage(ChatColor.RED + "Please contact the server admin because this TelePortal seems to be broken!");
     			}
@@ -77,11 +113,25 @@ public final class Main extends JavaPlugin implements Listener {
         		Sign sign = (Sign) block2.getState();
         		if(ChatColor.stripColor(sign.getLine(0)).equalsIgnoreCase("[TelePortal]")) {
         			if(getConfig().contains("teleportals." + sign.getLine(1) + ".x")) {
-        				Location tplocation = new Location((World) p.getWorld(), Double.parseDouble(getConfig().getString("teleportals." + sign.getLine(1) + ".x")), Double.parseDouble(getConfig().getString("teleportals." + sign.getLine(1) + ".y")), Double.parseDouble(getConfig().getString("teleportals." + sign.getLine(1) + ".z")));
-    		            if (p.getLocation().getBlock().getRelative(0, 0, 0).getType() == Material.STONE_PLATE) {
-    		                p.teleport(tplocation);
-    		                p.sendMessage(ChatColor.GREEN + "You have been teleported to " + sign.getLine(1) + "!");
-    		            }
+        				if(getConfig().contains("teleportals." + sign.getLine(1) + ".cost")) {
+    	    				EconomyResponse r = econ.withdrawPlayer(p.getName(), Integer.parseInt(getConfig().getString("teleportals." + sign.getLine(1) + ".cost")));
+    	    				if (r.transactionSuccess()) {
+    	    					Location tplocation = new Location((World) p.getWorld(), Double.parseDouble(getConfig().getString("teleportals." + sign.getLine(1) + ".x")), Double.parseDouble(getConfig().getString("teleportals." + sign.getLine(1) + ".y")), Double.parseDouble(getConfig().getString("teleportals." + sign.getLine(1) + ".z")));
+    	    		            if (p.getLocation().getBlock().getRelative(0, 0, 0).getType() == Material.STONE_PLATE) {
+    	    		                p.teleport(tplocation);
+    	    		                p.sendMessage(ChatColor.GREEN + "You have been teleported to " + sign.getLine(1) + "!");
+    	    		            }
+    	    				} else {
+    	    					p.sendMessage(ChatColor.RED
+    	    							+ "You don't have enough money to use this TelePortal!");
+    	    				}
+        				} else {
+        					Location tplocation = new Location((World) p.getWorld(), Double.parseDouble(getConfig().getString("teleportals." + sign.getLine(1) + ".x")), Double.parseDouble(getConfig().getString("teleportals." + sign.getLine(1) + ".y")), Double.parseDouble(getConfig().getString("teleportals." + sign.getLine(1) + ".z")));
+        		            if (p.getLocation().getBlock().getRelative(0, 0, 0).getType() == Material.STONE_PLATE) {
+        		                p.teleport(tplocation);
+        		                p.sendMessage(ChatColor.GREEN + "You have been teleported to " + sign.getLine(1) + "!");
+        		            }
+        				}
         			} else {
         				p.sendMessage(ChatColor.RED + "Please contact the server admin because this TelePortal seems to be broken!");
         			}
@@ -92,11 +142,25 @@ public final class Main extends JavaPlugin implements Listener {
             		Sign sign = (Sign) block3.getState();
             		if(ChatColor.stripColor(sign.getLine(0)).equalsIgnoreCase("[TelePortal]")) {
             			if(getConfig().contains("teleportals." + sign.getLine(1) + ".x")) {
-            				Location tplocation = new Location((World) p.getWorld(), Double.parseDouble(getConfig().getString("teleportals." + sign.getLine(1) + ".x")), Double.parseDouble(getConfig().getString("teleportals." + sign.getLine(1) + ".y")), Double.parseDouble(getConfig().getString("teleportals." + sign.getLine(1) + ".z")));
-        		            if (p.getLocation().getBlock().getRelative(0, 0, 0).getType() == Material.STONE_PLATE) {
-        		                p.teleport(tplocation);
-        		                p.sendMessage(ChatColor.GREEN + "You have been teleported to " + sign.getLine(1) + "!");
-        		            }
+            				if(getConfig().contains("teleportals." + sign.getLine(1) + ".cost")) {
+        	    				EconomyResponse r = econ.withdrawPlayer(p.getName(), Integer.parseInt(getConfig().getString("teleportals." + sign.getLine(1) + ".cost")));
+        	    				if (r.transactionSuccess()) {
+        	    					Location tplocation = new Location((World) p.getWorld(), Double.parseDouble(getConfig().getString("teleportals." + sign.getLine(1) + ".x")), Double.parseDouble(getConfig().getString("teleportals." + sign.getLine(1) + ".y")), Double.parseDouble(getConfig().getString("teleportals." + sign.getLine(1) + ".z")));
+        	    		            if (p.getLocation().getBlock().getRelative(0, 0, 0).getType() == Material.STONE_PLATE) {
+        	    		                p.teleport(tplocation);
+        	    		                p.sendMessage(ChatColor.GREEN + "You have been teleported to " + sign.getLine(1) + "!");
+        	    		            }
+        	    				} else {
+        	    					p.sendMessage(ChatColor.RED
+        	    							+ "You don't have enough money to use this TelePortal!");
+        	    				}
+            				} else {
+            					Location tplocation = new Location((World) p.getWorld(), Double.parseDouble(getConfig().getString("teleportals." + sign.getLine(1) + ".x")), Double.parseDouble(getConfig().getString("teleportals." + sign.getLine(1) + ".y")), Double.parseDouble(getConfig().getString("teleportals." + sign.getLine(1) + ".z")));
+            		            if (p.getLocation().getBlock().getRelative(0, 0, 0).getType() == Material.STONE_PLATE) {
+            		                p.teleport(tplocation);
+            		                p.sendMessage(ChatColor.GREEN + "You have been teleported to " + sign.getLine(1) + "!");
+            		            }
+            				}
             			} else {
             				p.sendMessage(ChatColor.RED + "Please contact the server admin because this TelePortal seems to be broken!");
             			}
@@ -107,11 +171,25 @@ public final class Main extends JavaPlugin implements Listener {
                 		Sign sign = (Sign) block4.getState();
                 		if(ChatColor.stripColor(sign.getLine(0)).equalsIgnoreCase("[TelePortal]")) {
                 			if(getConfig().contains("teleportals." + sign.getLine(1) + ".x")) {
-                				Location tplocation = new Location((World) p.getWorld(), Double.parseDouble(getConfig().getString("teleportals." + sign.getLine(1) + ".x")), Double.parseDouble(getConfig().getString("teleportals." + sign.getLine(1) + ".y")), Double.parseDouble(getConfig().getString("teleportals." + sign.getLine(1) + ".z")));
-            		            if (p.getLocation().getBlock().getRelative(0, 0, 0).getType() == Material.STONE_PLATE) {
-            		                p.teleport(tplocation);
-            		                p.sendMessage(ChatColor.GREEN + "You have been teleported to " + sign.getLine(1) + "!");
-            		            }
+                				if(getConfig().contains("teleportals." + sign.getLine(1) + ".cost")) {
+            	    				EconomyResponse r = econ.withdrawPlayer(p.getName(), Integer.parseInt(getConfig().getString("teleportals." + sign.getLine(1) + ".cost")));
+            	    				if (r.transactionSuccess()) {
+            	    					Location tplocation = new Location((World) p.getWorld(), Double.parseDouble(getConfig().getString("teleportals." + sign.getLine(1) + ".x")), Double.parseDouble(getConfig().getString("teleportals." + sign.getLine(1) + ".y")), Double.parseDouble(getConfig().getString("teleportals." + sign.getLine(1) + ".z")));
+            	    		            if (p.getLocation().getBlock().getRelative(0, 0, 0).getType() == Material.STONE_PLATE) {
+            	    		                p.teleport(tplocation);
+            	    		                p.sendMessage(ChatColor.GREEN + "You have been teleported to " + sign.getLine(1) + "!");
+            	    		            }
+            	    				} else {
+            	    					p.sendMessage(ChatColor.RED
+            	    							+ "You don't have enough money to use this TelePortal!");
+            	    				}
+                				} else {
+                					Location tplocation = new Location((World) p.getWorld(), Double.parseDouble(getConfig().getString("teleportals." + sign.getLine(1) + ".x")), Double.parseDouble(getConfig().getString("teleportals." + sign.getLine(1) + ".y")), Double.parseDouble(getConfig().getString("teleportals." + sign.getLine(1) + ".z")));
+                		            if (p.getLocation().getBlock().getRelative(0, 0, 0).getType() == Material.STONE_PLATE) {
+                		                p.teleport(tplocation);
+                		                p.sendMessage(ChatColor.GREEN + "You have been teleported to " + sign.getLine(1) + "!");
+                		            }
+                				}
                 			} else {
                 				p.sendMessage(ChatColor.RED + "Please contact the server admin because this TelePortal seems to be broken!");
                 			}
@@ -135,6 +213,9 @@ public final class Main extends JavaPlugin implements Listener {
 	        		getConfig().set("teleportals." + sign.getLine(0) + ".x", sign.getLine(1));
 	        		getConfig().set("teleportals." + sign.getLine(0) + ".y", sign.getLine(2));
 	        		getConfig().set("teleportals." + sign.getLine(0) + ".z", sign.getLine(3));
+	        		if(args.length == 1){
+	        			getConfig().set("teleportals." + sign.getLine(0) + ".cost", args[0]);
+	        		}
 	        		saveConfig();
 	        		sign.setLine(1, sign.getLine(0));
 	        		sign.setLine(0, ChatColor.AQUA +"[TelePortal]");
