@@ -204,7 +204,6 @@ public final class Main extends JavaPlugin implements Listener {
     	}
     }
     
-    @EventHandler
     public boolean onCommand(CommandSender sender, Command cmd,
 			String commandLabel, String[] args) {
         if(commandLabel.equalsIgnoreCase("rtp")){
