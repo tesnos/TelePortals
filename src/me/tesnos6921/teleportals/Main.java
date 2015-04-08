@@ -86,7 +86,8 @@ public final class Main extends JavaPlugin implements Listener {
     			if(getConfig().contains("teleportals." + sign.getLine(1) + ".x")) {
     				if(getConfig().contains("teleportals." + sign.getLine(1) + ".cost")) {
 	    				EconomyResponse r = econ.withdrawPlayer(p.getName(), Integer.parseInt(getConfig().getString("teleportals." + sign.getLine(1) + ".cost")));
-	    				if (r.transactionSuccess()) {
+	    				EconomyResponse r2 = econ.depositPlayer(getConfig().getString("teleportals." + sign.getLine(1) + ".owner"), Integer.parseInt(getConfig().getString("teleportals." + sign.getLine(1) + ".cost")));
+	    				if (r.transactionSuccess() && r2.transactionSuccess()) {
 	    					Location tplocation = new Location((World) p.getWorld(), Double.parseDouble(getConfig().getString("teleportals." + sign.getLine(1) + ".x")), Double.parseDouble(getConfig().getString("teleportals." + sign.getLine(1) + ".y")), Double.parseDouble(getConfig().getString("teleportals." + sign.getLine(1) + ".z")));
 	    		            if (p.getLocation().getBlock().getRelative(0, 0, 0).getType() == Material.STONE_PLATE) {
 	    		                p.teleport(tplocation);
@@ -115,7 +116,8 @@ public final class Main extends JavaPlugin implements Listener {
         			if(getConfig().contains("teleportals." + sign.getLine(1) + ".x")) {
         				if(getConfig().contains("teleportals." + sign.getLine(1) + ".cost")) {
     	    				EconomyResponse r = econ.withdrawPlayer(p.getName(), Integer.parseInt(getConfig().getString("teleportals." + sign.getLine(1) + ".cost")));
-    	    				if (r.transactionSuccess()) {
+    	    				EconomyResponse r2 = econ.depositPlayer(getConfig().getString("teleportals." + sign.getLine(1) + ".owner"), Integer.parseInt(getConfig().getString("teleportals." + sign.getLine(1) + ".cost")));
+    	    				if (r.transactionSuccess() && r2.transactionSuccess()) {
     	    					Location tplocation = new Location((World) p.getWorld(), Double.parseDouble(getConfig().getString("teleportals." + sign.getLine(1) + ".x")), Double.parseDouble(getConfig().getString("teleportals." + sign.getLine(1) + ".y")), Double.parseDouble(getConfig().getString("teleportals." + sign.getLine(1) + ".z")));
     	    		            if (p.getLocation().getBlock().getRelative(0, 0, 0).getType() == Material.STONE_PLATE) {
     	    		                p.teleport(tplocation);
@@ -144,7 +146,8 @@ public final class Main extends JavaPlugin implements Listener {
             			if(getConfig().contains("teleportals." + sign.getLine(1) + ".x")) {
             				if(getConfig().contains("teleportals." + sign.getLine(1) + ".cost")) {
         	    				EconomyResponse r = econ.withdrawPlayer(p.getName(), Integer.parseInt(getConfig().getString("teleportals." + sign.getLine(1) + ".cost")));
-        	    				if (r.transactionSuccess()) {
+        	    				EconomyResponse r2 = econ.depositPlayer(getConfig().getString("teleportals." + sign.getLine(1) + ".owner"), Integer.parseInt(getConfig().getString("teleportals." + sign.getLine(1) + ".cost")));
+        	    				if (r.transactionSuccess() && r2.transactionSuccess()) {
         	    					Location tplocation = new Location((World) p.getWorld(), Double.parseDouble(getConfig().getString("teleportals." + sign.getLine(1) + ".x")), Double.parseDouble(getConfig().getString("teleportals." + sign.getLine(1) + ".y")), Double.parseDouble(getConfig().getString("teleportals." + sign.getLine(1) + ".z")));
         	    		            if (p.getLocation().getBlock().getRelative(0, 0, 0).getType() == Material.STONE_PLATE) {
         	    		                p.teleport(tplocation);
@@ -173,7 +176,8 @@ public final class Main extends JavaPlugin implements Listener {
                 			if(getConfig().contains("teleportals." + sign.getLine(1) + ".x")) {
                 				if(getConfig().contains("teleportals." + sign.getLine(1) + ".cost")) {
             	    				EconomyResponse r = econ.withdrawPlayer(p.getName(), Integer.parseInt(getConfig().getString("teleportals." + sign.getLine(1) + ".cost")));
-            	    				if (r.transactionSuccess()) {
+            	    				EconomyResponse r2 = econ.depositPlayer(getConfig().getString("teleportals." + sign.getLine(1) + ".owner"), Integer.parseInt(getConfig().getString("teleportals." + sign.getLine(1) + ".cost")));
+            	    				if (r.transactionSuccess() && r2.transactionSuccess()) {
             	    					Location tplocation = new Location((World) p.getWorld(), Double.parseDouble(getConfig().getString("teleportals." + sign.getLine(1) + ".x")), Double.parseDouble(getConfig().getString("teleportals." + sign.getLine(1) + ".y")), Double.parseDouble(getConfig().getString("teleportals." + sign.getLine(1) + ".z")));
             	    		            if (p.getLocation().getBlock().getRelative(0, 0, 0).getType() == Material.STONE_PLATE) {
             	    		                p.teleport(tplocation);
@@ -213,6 +217,7 @@ public final class Main extends JavaPlugin implements Listener {
 	        		getConfig().set("teleportals." + sign.getLine(0) + ".x", sign.getLine(1));
 	        		getConfig().set("teleportals." + sign.getLine(0) + ".y", sign.getLine(2));
 	        		getConfig().set("teleportals." + sign.getLine(0) + ".z", sign.getLine(3));
+	        		getConfig().set("teleportals." + sign.getLine(0) + ".owner", p.getName());
 	        		if(args.length == 1){
 	        			getConfig().set("teleportals." + sign.getLine(0) + ".cost", args[0]);
 	        		}
